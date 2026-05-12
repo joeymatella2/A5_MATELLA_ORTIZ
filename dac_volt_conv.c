@@ -33,6 +33,7 @@ void DAC_init(void) {
 	// enable clock for GPIOA & SPI1
 	RCC->AHB2ENR |= (RCC_AHB2ENR_GPIOAEN);                // GPIOA: DAC NSS/SCK/SDO
 	RCC->APB2ENR |= (RCC_APB2ENR_SPI1EN);                 // SPI1 port
+	
 	/* USER ADD GPIO configuration of MODER/PUPDR/OTYPER/OSPEEDR registers HERE */
 	// configure AFR for SPI1 function (1 of 3 SPI bits shown here)
 	// SPI1_MOSI Port A pin 7
@@ -47,11 +48,13 @@ void DAC_init(void) {
 	// SPI1_NSS Port A pin 4
 	GPIOA->AFR[0] &= ~((0x000F << GPIO_AFRL_AFSEL4_Pos));
 	GPIOA->AFR[0] |=  ((0x0005 << GPIO_AFRL_AFSEL4_Pos));
+	
 	// SPI config as specified @ STM32L4 RM0351 rev.9 p.1459
 	// called by or with DAC_init()
 	// build control registers CR1 & CR2 for SPI control of peripheral DAC
 	// assumes no active SPI xmits & no recv data in process (BSY=0)
 	// CR1 (reset value = 0x0000)
+	
 	SPI1->CR1 &= ~( SPI_CR1_SPE );             	// disable SPI for config
 	SPI1->CR1 &= ~( SPI_CR1_RXONLY );          	// recv-only OFF
 	SPI1->CR1 &= ~( SPI_CR1_LSBFIRST );        	// data bit order MSb:LSb
@@ -84,15 +87,19 @@ void DAC_write(uint16_t data) {
 	while (!(SPI1->SR & SPI_SR_TXE)) {
 		;
 	}
+	
 	// Configure upper 4 bits for DAC
 	data &= ~(0xF << 12);
 	data |= (0x3 << 12);
+	
 	// Write 16-bit data to SPI data register
 	SPI1->DR = data;
+	
 	// Wait until transmit buffer is empty
 	while (!(SPI1->SR & SPI_SR_TXE)) {
 		;
 	}
+	
 	// Wait until SPI is no longer busy shifting bits out
 	while (SPI1->SR & SPI_SR_BSY) {
 		;
