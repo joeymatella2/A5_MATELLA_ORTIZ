@@ -34,8 +34,14 @@
 
 #include "stm32l4xx_hal.h"
 
+#define DAC_SLOPE_UV_PER_CODE   1002L
+#define DAC_OFFSET_UV           208L
+
 void DAC_init(void);
 void DAC_write(uint16_t data);
+uint16_t DAC_volt_conv(uint16_t target_centivolts);
+
+
 
 
 
